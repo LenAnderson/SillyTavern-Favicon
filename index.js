@@ -6,6 +6,9 @@ import { isTrueBoolean } from '../../../utils.js';
 
 registerSlashCommand('favicon',
     async(args, value)=>{
+        if (isTrueBoolean(args.get)) {
+            return extension_settings.favicon ?? '';
+        }
         if (isTrueBoolean(args.upload)) {
             const dom = document.createElement('div'); {
                 const title = document.createElement('h3'); {
@@ -38,7 +41,7 @@ registerSlashCommand('favicon',
         updateFavicon();
     },
     [],
-    '<span class="monospace">[optional upload=true] (optional dataURI)</span> – Sets the favicon to the provided dataURI or opens a dialog to upload a favicon.',
+    '<span class="monospace">[optional upload=true] [optional get=true] (optional dataURI)</span> – Sets the favicon to the provided dataURI or opens a dialog to upload a favicon.',
     true,
     true,
 );
