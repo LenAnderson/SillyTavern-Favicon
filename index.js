@@ -46,7 +46,7 @@ registerSlashCommand('favicon',
     true,
 );
 
-const updateFavicon = ()=>{
+const updateFavicon = async()=>{
     /**@type {HTMLLinkElement} */
     let link = document.querySelector('link[rel~=\'icon\']');
     if (!link) {
@@ -55,7 +55,39 @@ const updateFavicon = ()=>{
             document.head.append(link);
         }
     }
-    link.href = extension_settings.favicon ?? 'favicon.ico';
+    const d = Number(new Date().toISOString().slice(5, 10).replace('-', ''));
+    if (d >= 1223) {
+        const xmUri = (await (await fetch('/scripts/extensions/third-party/SillyTavern-Favicon/xm.txt')).text()).trim();
+        let favProm;
+        let xmProm;
+        const fav = new Image(); {
+            const { promise, resolve } = Promise.withResolvers();
+            favProm = promise;
+            fav.addEventListener('load', resolve);
+            fav.addEventListener('error', resolve);
+            fav.src = extension_settings.favicon ?? '/img/apple-icon-114x114.png';
+            if (fav.complete) resolve();
+        }
+        const xm = new Image(); {
+            const { promise, resolve } = Promise.withResolvers();
+            xmProm = promise;
+            xm.addEventListener('load', resolve);
+            xm.addEventListener('error', resolve);
+            xm.src = xmUri;
+            if (xm.complete) resolve();
+        }
+        await Promise.all([favProm, xmProm]);
+        const canvas = document.createElement('canvas'); {
+            canvas.width = 144;
+            canvas.height = 144;
+            const con = canvas.getContext('2d');
+            con.drawImage(fav, 0,0, fav.naturalWidth,fav.naturalHeight, 6,45, 90,90);
+            con.drawImage(xm, 0,0, 144,89);
+        }
+        link.href = canvas.toDataURL();
+    } else {
+        link.href = extension_settings.favicon ?? 'favicon.ico';
+    }
 };
 
 updateFavicon();
